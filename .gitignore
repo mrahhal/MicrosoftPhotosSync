@@ -5,3 +5,4 @@ artifacts/
 *.db
 *.db-shm
 *.db-wal
+src/mps/Properties/launchSettings.json
