@@ -19,3 +19,5 @@ csharp_style_var_elsewhere = true:warning
 
 # CA1822: Mark members as static
 dotnet_diagnostic.CA1822.severity = silent
+# CA1707: Identifiers should not contain underscores
+dotnet_diagnostic.CA1707.severity = none
