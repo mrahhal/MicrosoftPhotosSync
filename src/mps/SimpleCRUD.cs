@@ -28,7 +28,7 @@ namespace Dapper
 			SetDialect(_dialect);
 		}
 
-		private static Dialect _dialect = Dialect.SQLServer;
+		private static Dialect _dialect = Dialect.SQLite;
 		private static string _encapsulation;
 		private static string _getIdentitySql;
 		private static string _getPagedListSql;
