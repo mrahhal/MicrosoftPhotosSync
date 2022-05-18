@@ -5,7 +5,8 @@ Console.OutputEncoding = Encoding.UTF8;
 
 var albumNames = new[]
 {
-	"Czechia, September 2019", "Japan, November 2019", "France, December 2018",
+	//"Czechia, September 2019", "Japan, November 2019", "France, December 2018",
+	"可愛よ", "かわとっぷ",
 }.ToHashSet();
 
 var dry = false;
