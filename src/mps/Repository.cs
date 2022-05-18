@@ -32,6 +32,7 @@ public sealed class Repository : IDisposable
 	public static Repository Load(string dbPath)
 	{
 		var c = new SqliteConnection($"Data Source={dbPath}");
+		c.CreateCollation("NoCaseUnicode", (s1, s2) => string.Compare(s1, s2, StringComparison.OrdinalIgnoreCase));
 		c.Open();
 		var r = new Repository(c);
 		r.Load();
@@ -91,12 +92,14 @@ public sealed class Repository : IDisposable
 	public int CreateAlbum(Album album)
 	{
 		return _c.Insert(album)!.Value;
+	}
 
-		//		return _c.Query<int>(@$"
-		//insert into [Album] ([Album_Name], [Album_Type], [Album_State], [Album_DateCreated], [Album_DateUpdated], [Album_DateUserModified], [Album_DateViewed], [Album_Count]) values (@Album_Name, @Album_Type, @Album_State, @Album_DateCreated, @Album_DateUpdated, @Album_DateUserModified, @Album_DateViewed, @Album_Count);
-		//SELECT last_insert_rowid()",
-		//			album)
-		//			.First();
+	public void UpdateAlbum(PatchedAlbum patchedAlbum)
+	{
+		var count = patchedAlbum.Original.Album_Count + patchedAlbum.ItemsAdded.Count;
+		_c.Execute(@$"
+UPDATE {TableNames.Album} WHERE Album_Id = @id SET Album_Count = @count",
+			new { id = patchedAlbum.Id, count });
 	}
 
 	public void CreateLink(AlbumItemLink link)
@@ -104,8 +107,6 @@ public sealed class Repository : IDisposable
 		_c.Execute(@$"
 INSERT INTO {TableNames.AlbumItemLink} (AlbumItemLink_AlbumId, AlbumItemLink_ItemId) VALUES (@AlbumItemLink_AlbumId, @AlbumItemLink_ItemId)",
 			link);
-
-		_c.Insert(link);
 	}
 
 	List<Folder> SelectFolders()

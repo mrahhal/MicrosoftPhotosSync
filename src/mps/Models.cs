@@ -27,11 +27,32 @@ public record class Album
 	public string Album_Name { get; set; } = null!;
 	public int Album_Type { get; set; }
 	public int Album_State { get; set; }
+	public int Album_QueryType { get; set; }
+	public int Album_QueryBoundsType { get; set; }
+	public string Album_Query { get; set; } = null!;
 	public long? Album_DateCreated { get; set; }
 	public long? Album_DateUpdated { get; set; }
 	public long? Album_DateUserModified { get; set; }
 	public long? Album_DateViewed { get; set; }
+	public long? Album_DateShared { get; set; }
 	public long? Album_Count { get; set; }
+	public double Album_CoverBoundsLeft { get; set; }
+	public double Album_CoverBoundsTop { get; set; }
+	public double Album_CoverBoundsRight { get; set; }
+	public double Album_CoverBoundsBottom { get; set; }
+	public int Album_Visibility { get; set; }
+	public long? Album_EventStartDate { get; set; }
+	public long? Album_EventEndDate { get; set; }
+	public long? Album_SummaryStartDate { get; set; }
+	public long? Album_SummaryEndDate { get; set; }
+	public int Album_Source { get; set; }
+	public int Album_SourceId { get; set; }
+	public int Album_PublishState { get; set; }
+	public int Album_PendingTelemetryUploadState { get; set; }
+	public int Album_SentTelemetryUploadState { get; set; }
+	public string Album_ETag { get; set; } = null!;
+	public int Album_CreationType { get; set; }
+	public int Album_Order { get; set; }
 }
 
 public class AlbumItemLink

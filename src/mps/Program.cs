@@ -80,6 +80,8 @@ bool ItemsEqual(Item fromItem, Item toItem)
 
 void ProcessPatched(PatchedAlbum album)
 {
+	Console.WriteLine();
+
 	var createdText = album.Created ? "[New]" : "";
 	Console.WriteLine($"- '{album.Name}' {createdText} ({album.ItemsTotal} items):");
 	Console.WriteLine($"\tNew: {album.ItemsAdded.Count}\tExists: {album.ItemsExisted.Count}\tNot Found: {album.ItemsNotFound.Count}");
@@ -97,7 +99,6 @@ void ProcessPatched(PatchedAlbum album)
 
 	var id = album.Id;
 
-	// TODO: What about album count? Shouldn't we update that?
 	if (album.Created)
 	{
 		id = toRepo.CreateAlbum(album.ToNewAlbum());
@@ -108,48 +109,9 @@ void ProcessPatched(PatchedAlbum album)
 	{
 		toRepo.CreateLink(new AlbumItemLink { AlbumItemLink_AlbumId = id, AlbumItemLink_ItemId = item.Item_Id });
 	}
-}
 
-// ===
-
-enum ProcessedItemType
-{
-	Existed,
-	Added,
-	NotFound,
-}
-
-class PatchedAlbum
-{
-	public PatchedAlbum(Album original)
+	if (!album.Created)
 	{
-		Original = original;
-	}
-
-	public Album Original { get; }
-
-	public string Name => Original.Album_Name;
-
-	public int Id { get; set; }
-
-	/// <summary>
-	/// Whether this album is newly created or already existed.
-	/// </summary>
-	public bool Created => Id == 0;
-
-	public int ItemsTotal { get; set; }
-
-	public List<Item> ItemsExisted { get; set; } = new();
-
-	public List<Item> ItemsAdded { get; set; } = new();
-
-	public List<Item> ItemsNotFound { get; set; } = new();
-
-	public Album ToNewAlbum()
-	{
-		return Original with
-		{
-			Album_Id = 0,
-		};
+		toRepo.UpdateAlbum(album);
 	}
 }
