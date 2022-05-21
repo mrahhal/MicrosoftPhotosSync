@@ -4,11 +4,19 @@ using mps;
 Console.OutputEncoding = Encoding.UTF8;
 
 var dry = false;
+var indent = "    ";
 
 if (args.Any(a => a == "--dry"))
 {
 	dry = true;
 	args = args.Where(a => a != "--dry").ToArray();
+}
+
+if (dry)
+{
+	ColorConsole.WriteInfo("dry");
+	Console.WriteLine("===");
+	Console.WriteLine();
 }
 
 if (args.Length != 2)
@@ -29,11 +37,34 @@ var to = args[1];
 using var fromRepo = Repository.Load(from);
 using var toRepo = Repository.Load(to);
 
+var oldItemIdToNewItemId = new Dictionary<int, int>();
+foreach (var fromItem in fromRepo.Items)
+{
+	var p = fromRepo.GetItemPath(fromItem);
+	if (toRepo.PathToItemMap.TryGetValue(p, out var toItem))
+	{
+		oldItemIdToNewItemId[fromItem.Item_Id] = toItem.Item_Id;
+	}
+}
+
 var patchedAlbums = new List<PatchedAlbum>();
+
+int? GetNewItemIdFromOldItemId(int? oldItemId)
+{
+	if (oldItemId == null) return null;
+	if (oldItemIdToNewItemId.TryGetValue(oldItemId.Value, out var newItemId))
+	{
+		return newItemId;
+	}
+	return null;
+}
 
 foreach (var album in fromRepo.Albums.Where(x => x.Album_Visibility == 1))
 {
-	var patched = new PatchedAlbum(album);
+	var patched = new PatchedAlbum(album with
+	{
+		Album_CoverItemId = GetNewItemIdFromOldItemId(album.Album_CoverItemId),
+	});
 	patchedAlbums.Add(patched);
 
 	var existingAlbum = toRepo.Albums.FirstOrDefault(toAlbum => toAlbum.Album_Name == album.Album_Name);
@@ -75,20 +106,36 @@ bool ItemsEqual(Item fromItem, Item toItem)
 
 void ProcessPatched(PatchedAlbum album)
 {
+	var createdText = album.Created ? "[Green](New)[/Green]" : "";
+	ColorConsole.WriteEmbeddedColorLine($"Album: [Info]'{album.Name}'[/Info] {createdText} ({album.ItemsTotal} items)");
 	Console.WriteLine();
-
-	var createdText = album.Created ? "[New]" : "";
-	Console.WriteLine($"- '{album.Name}' {createdText} ({album.ItemsTotal} items):");
-	Console.WriteLine($"\tNew: {album.ItemsAdded.Count}\tExists: {album.ItemsExisted.Count}\tNot Found: {album.ItemsNotFound.Count}");
-	if (album.ItemsNotFound.Any())
+	if (!album.ItemsAdded.Any())
 	{
-		Console.WriteLine($"\tNot found:");
-
-		foreach (var item in album.ItemsNotFound)
+		if (!album.ItemsNotFound.Any())
 		{
-			Console.WriteLine($"\t\t- {fromRepo.GetItemPath(item)}");
+			ColorConsole.WriteSuccess("Fully synced");
+		}
+		else
+		{
+			ColorConsole.WriteSuccess("Partially synced");
 		}
 	}
+	if (album.ItemsAdded.Any())
+	{
+		ColorConsole.WriteSuccess($"{indent}{album.ItemsAdded.Count} found and added");
+	}
+	if (album.ItemsNotFound.Any())
+	{
+		ColorConsole.WriteError($"{indent}{album.ItemsNotFound.Count} not found:");
+		foreach (var item in album.ItemsNotFound)
+		{
+			ColorConsole.WriteError($"{indent}{indent}- {fromRepo.GetItemPath(item)}");
+		}
+	}
+
+	Console.WriteLine();
+	Console.WriteLine("================");
+	Console.WriteLine();
 
 	// ---
 
@@ -98,15 +145,23 @@ void ProcessPatched(PatchedAlbum album)
 	{
 		id = toRepo.CreateAlbum(album.ToNewAlbum());
 	}
+	else
+	{
+		toRepo.UpdateAlbum(album);
+	}
 
 	var linkedItemsToCreate = album.ItemsAdded;
 	foreach (var item in linkedItemsToCreate)
 	{
 		toRepo.CreateLink(new AlbumItemLink { AlbumItemLink_AlbumId = id, AlbumItemLink_ItemId = item.Item_Id });
 	}
+}
 
-	if (!album.Created)
-	{
-		toRepo.UpdateAlbum(album);
-	}
+if (dry)
+{
+	toRepo.Rollback();
+}
+else
+{
+	toRepo.Commit();
 }

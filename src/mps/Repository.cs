@@ -7,10 +7,12 @@ namespace mps;
 public sealed class Repository : IDisposable
 {
 	private readonly SqliteConnection _c;
+	private readonly SqliteTransaction _t;
 
 	public Repository(SqliteConnection c)
 	{
 		_c = c;
+		_t = _c.BeginTransaction();
 	}
 
 	public List<Folder> Folders { get; private set; } = null!;
@@ -27,7 +29,7 @@ public sealed class Repository : IDisposable
 	public Dictionary<int, List<AlbumItemLink>> AlbumItemLinksByAlbumId { get; private set; } = null!;
 	public Dictionary<int, List<AlbumItemLink>> AlbumItemLinksByItemId { get; private set; } = null!;
 
-	public Dictionary<string, Item> PathToItemMap { get; private set; } = new();
+	public Dictionary<ResilientPath, Item> PathToItemMap { get; private set; } = new();
 
 	private ConcurrentDictionary<Album, List<Item>> ItemsInAlbumCache { get; } = new();
 
@@ -43,7 +45,18 @@ public sealed class Repository : IDisposable
 
 	public void Dispose()
 	{
+		_t.Dispose();
 		_c.Dispose();
+	}
+
+	public void Commit()
+	{
+		_t.Commit();
+	}
+
+	public void Rollback()
+	{
+		_t.Rollback();
 	}
 
 	void Load()
@@ -113,8 +126,8 @@ public sealed class Repository : IDisposable
 	{
 		var count = patchedAlbum.Inner.Album_Count + patchedAlbum.ItemsAdded.Count;
 		_c.Execute(@$"
-UPDATE {TableNames.Album} WHERE Album_Id = @id SET Album_Count = @count",
-			new { id = patchedAlbum.Id, count });
+UPDATE {TableNames.Album} SET Album_Count = @count, Album_CoverItemId = @coverItemId WHERE Album_Id = @id",
+			new { id = patchedAlbum.Id, count, coverItemId = patchedAlbum.Inner.Album_CoverItemId });
 	}
 
 	public void CreateLink(AlbumItemLink link)
