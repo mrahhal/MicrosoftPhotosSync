@@ -33,6 +33,8 @@ mps /path/to/backup/MediaDb.v1.sqlite %LOCALAPPDATA%\Packages\Microsoft.Windows.
 
 The "--dry" option above will make the tool show you what it'll change without doing anything actually destructive. When you're ready to actually change the DB, remove the "--dry" option from the command above.
 
+> You can run the same command multiple times. If the same album name is found it'll update and sync that album instead of creating a new one.
+
 ## Sample run
 
 ![](pics/2022-05-21-17-11-14.jpg)
