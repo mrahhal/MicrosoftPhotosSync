@@ -27,6 +27,8 @@ public sealed class Repository : IDisposable
 	public Dictionary<int, List<AlbumItemLink>> AlbumItemLinksByAlbumId { get; private set; } = null!;
 	public Dictionary<int, List<AlbumItemLink>> AlbumItemLinksByItemId { get; private set; } = null!;
 
+	public Dictionary<string, Item> PathToItemMap { get; private set; } = new();
+
 	private ConcurrentDictionary<Album, List<Item>> ItemsInAlbumCache { get; } = new();
 
 	public static Repository Load(string dbPath)
@@ -59,6 +61,12 @@ public sealed class Repository : IDisposable
 		AlbumItemLinksSet = AlbumItemLinks.Select(x => (x.AlbumItemLink_AlbumId, x.AlbumItemLink_ItemId)).ToHashSet();
 		AlbumItemLinksByAlbumId = AlbumItemLinks.GroupBy(x => x.AlbumItemLink_AlbumId).ToDictionary(x => x.Key, x => x.ToList());
 		AlbumItemLinksByItemId = AlbumItemLinks.GroupBy(x => x.AlbumItemLink_ItemId).ToDictionary(x => x.Key, x => x.ToList());
+
+		PathToItemMap = Items.ToDictionary(x =>
+		{
+			var folder = FoldersById[x.Item_ParentFolderId];
+			return $"{folder.Folder_Path}\\{x.Item_FileName}";
+		});
 	}
 
 	public bool ContainsAlbumItemLink(int albumId, int itemId)
@@ -105,7 +113,7 @@ UPDATE {TableNames.Album} WHERE Album_Id = @id SET Album_Count = @count",
 	public void CreateLink(AlbumItemLink link)
 	{
 		_c.Execute(@$"
-INSERT INTO {TableNames.AlbumItemLink} (AlbumItemLink_AlbumId, AlbumItemLink_ItemId) VALUES (@AlbumItemLink_AlbumId, @AlbumItemLink_ItemId)",
+INSERT INTO {TableNames.AlbumItemLink} (AlbumItemLink_AlbumId, AlbumItemLink_ItemId, AlbumItemLink_Order, AlbumItemLink_ItemPhotosCloudId) VALUES (@AlbumItemLink_AlbumId, @AlbumItemLink_ItemId, @AlbumItemLink_Order, @AlbumItemLink_ItemPhotosCloudId)",
 			link);
 	}
 
