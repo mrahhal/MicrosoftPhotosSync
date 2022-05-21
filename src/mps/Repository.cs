@@ -64,8 +64,7 @@ public sealed class Repository : IDisposable
 
 		PathToItemMap = Items.ToDictionary(x =>
 		{
-			var folder = FoldersById[x.Item_ParentFolderId];
-			return $"{folder.Folder_Path}\\{x.Item_FileName}";
+			return GetItemPath(x);
 		});
 	}
 
@@ -91,10 +90,18 @@ public sealed class Repository : IDisposable
 		});
 	}
 
-	public string GetItemPath(Item item)
+	public ResilientPath GetItemPath(Item item)
 	{
 		var folder = FoldersById[item.Item_ParentFolderId];
-		return $"{folder.Folder_Path}\\{item.Item_FileName}";
+		if (folder.Folder_Path != null)
+		{
+			var fullPath = $"{folder.Folder_Path}\\{item.Item_FileName}";
+			return ResilientPath.CreateLocal(fullPath);
+		}
+		else
+		{
+			return ResilientPath.CreateRemote(new(folder.Folder_Id, item.Item_FileName));
+		}
 	}
 
 	public int CreateAlbum(Album album)
@@ -104,7 +111,7 @@ public sealed class Repository : IDisposable
 
 	public void UpdateAlbum(PatchedAlbum patchedAlbum)
 	{
-		var count = patchedAlbum.Original.Album_Count + patchedAlbum.ItemsAdded.Count;
+		var count = patchedAlbum.Inner.Album_Count + patchedAlbum.ItemsAdded.Count;
 		_c.Execute(@$"
 UPDATE {TableNames.Album} WHERE Album_Id = @id SET Album_Count = @count",
 			new { id = patchedAlbum.Id, count });
