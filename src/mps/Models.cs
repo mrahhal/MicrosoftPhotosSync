@@ -29,7 +29,7 @@ public record class Album
 	public int Album_State { get; set; }
 	public int Album_QueryType { get; set; }
 	public int Album_QueryBoundsType { get; set; }
-	public string Album_Query { get; set; } = null!;
+	public string? Album_Query { get; set; }
 	public long? Album_DateCreated { get; set; }
 	public long? Album_DateUpdated { get; set; }
 	public long? Album_DateUserModified { get; set; }
@@ -41,6 +41,7 @@ public record class Album
 	public double Album_CoverBoundsRight { get; set; }
 	public double Album_CoverBoundsBottom { get; set; }
 	public int Album_Visibility { get; set; }
+	public int? Album_CoverItemId { get; set; }
 	public long? Album_EventStartDate { get; set; }
 	public long? Album_EventEndDate { get; set; }
 	public long? Album_SummaryStartDate { get; set; }
@@ -50,7 +51,7 @@ public record class Album
 	public int Album_PublishState { get; set; }
 	public int Album_PendingTelemetryUploadState { get; set; }
 	public int Album_SentTelemetryUploadState { get; set; }
-	public string Album_ETag { get; set; } = null!;
+	public string? Album_ETag { get; set; }
 	public int Album_CreationType { get; set; }
 	public int Album_Order { get; set; }
 }
@@ -59,6 +60,8 @@ public class AlbumItemLink
 {
 	public int AlbumItemLink_AlbumId { get; set; }
 	public int AlbumItemLink_ItemId { get; set; }
+	public int AlbumItemLink_Order { get; set; }
+	public int? AlbumItemLink_ItemPhotosCloudId { get; set; }
 
 	public (int, int) Id => (AlbumItemLink_AlbumId, AlbumItemLink_ItemId);
 }
