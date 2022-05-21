@@ -25,7 +25,7 @@ if (args.Length != 2)
 @"Syncs albums from one Microsoft Photos db to another.
 
 Usage:
-mps [from] [to]
+mps [from db] [to db]
 
 --dry: Dry run");
 	Environment.Exit(1);
