@@ -3,12 +3,6 @@ using mps;
 
 Console.OutputEncoding = Encoding.UTF8;
 
-var albumNames = new[]
-{
-	//"Czechia, September 2019", "Japan, November 2019", "France, December 2018",
-	"可愛よ", "かわとっぷ",
-}.ToHashSet();
-
 var dry = false;
 
 if (args.Any(a => a == "--dry"))
@@ -37,7 +31,7 @@ using var toRepo = Repository.Load(to);
 
 var patchedAlbums = new List<PatchedAlbum>();
 
-foreach (var album in fromRepo.Albums.Where(x => albumNames.Contains(x.Album_Name))) // x.Album_State == 0
+foreach (var album in fromRepo.Albums.Where(x => x.Album_Visibility == 1))
 {
 	var patched = new PatchedAlbum(album);
 	patchedAlbums.Add(patched);
