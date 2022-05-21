@@ -1,8 +1,8 @@
 # MicrosoftPhotosSync
 
-Syncs albums from one Microsoft Photos db to another.
+Sync local albums from one Microsoft Photos db to another.
 
-The goal is to sync local albums. Note that this is different from backing up to OneDrive, a feature that Photos support.
+The goal is to sync local albums. Note that this is different from backing albums up to OneDrive, a feature that Photos support.
 Backing up to OneDrive works by duplicating these pictures even if they're already stored in OneDrive.
 
 > Use this tool at your own risk. This tool is destructive, so make sure to backup the LocalState folder (mentioned below) before you run this.
