@@ -25,10 +25,16 @@ Right now, you can only use this tool by building it yourself.
 
 First, backup your old DB by copying the whole LocalState folder to a safe place.
 
-Put this backup somewhere on your new machine, close Photos, and then using this tool:
+Put this backup somewhere on your new machine, close Photos, and then using it in either cmd or powershell:
 
+cmd:
 ```
 mps /path/to/backup/MediaDb.v1.sqlite %LOCALAPPDATA%\Packages\Microsoft.Windows.Photos_8wekyb3d8bbwe\LocalState\MediaDb.v1.sqlite --dry
+```
+
+powershell:
+```
+mps /path/to/backup/MediaDb.v1.sqlite $env:LOCALAPPDATA\Packages\Microsoft.Windows.Photos_8wekyb3d8bbwe\LocalState\MediaDb.v1.sqlite --dry
 ```
 
 The "--dry" option above will make the tool show you what it'll change without doing anything actually destructive. When you're ready to actually change the DB, remove the "--dry" option from the command above.
