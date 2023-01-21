@@ -1,5 +1,7 @@
 # MicrosoftPhotosSync
 
+Update: Doesn't work with the new Photos app.
+
 Sync local albums from one Microsoft Photos db to another.
 
 The goal is to sync local albums. Note that this is different from backing albums up to OneDrive, a feature that Photos support.
